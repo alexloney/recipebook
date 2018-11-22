@@ -1,0 +1,38 @@
+
+<div>
+  Add a photo (no smaller than 960x960)
+</div>
+<div>
+  Prep time <input type="text" pInputText [(ngModel)]="prepTime" />
+</div>
+<div>
+  Cook time <input type="text" pInputText [(ngModel)]="cookTime" />
+</div>
+<div>
+  Ready in (optional) <input type="text" pInputText [(ngModel)]="readyIn" />
+</div>
+<div>
+  Number of servings <input type="text" pInputText [(ngModel)]="servings" />
+</div>
+<div>
+  Recipe yield (optional) <input type="text" pInputText [(ngModel)]="yield" />
+</div>
+<div>
+  Title <input type="text" pInputText [(ngModel)]="title" />
+</div>
+<div>
+  Description <textarea pInputTextarea type="text" pInputText [(ngModel)]="description"></textarea>
+</div>
+<div>
+  ingredients <textarea pInputTextarea type="text" pInputText [(ngModel)]="ingredients"></textarea>
+</div>
+<div>
+  directions <textarea pInputTextarea type="text" pInputText [(ngModel)]="directions"></textarea>
+</div>
+
+<button (click)="saveClick()">Save</button>
+
+<!-- <div *ngFor="let item of items | async; let i = index">
+  <span>{{ i + 1 }}</span>
+  <span>{{ item.name }}</span>
+</div> -->
