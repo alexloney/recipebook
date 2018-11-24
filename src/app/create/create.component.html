@@ -1,33 +1,84 @@
 
 <div>
-  Add a photo (no smaller than 960x960)
+  <p-messages [(value)]="msgs"></p-messages>
 </div>
-<div>
-  Prep time <input type="text" pInputText [(ngModel)]="prepTime" />
+
+<div class="ui-g">
+  <div class="ui-g-5 ui-sm-12">
+    <div class="entry-item">
+      <div class="entry-title">Title</div>
+      <div><input required class="entry-field" type="text" pInputText [(ngModel)]="title" /></div>
+      <span class="error-text" *ngIf="titleError && titleError.length > 0">{{ titleError }}</span>
+    </div>
+    <div>
+      <div class="entry-item">
+        <div class="entry-title">Description</div>
+        <div><textarea required class="entry-text" pInputTextarea type="text" pInputText [(ngModel)]="description"></textarea></div>
+        <span class="error-text" *ngIf="descriptionError && descriptionError.length > 0">{{ descriptionError }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="ui-g-7 ui-sm-12">
+    Image
+  </div>
 </div>
-<div>
-  Cook time <input type="text" pInputText [(ngModel)]="cookTime" />
+
+<div class="ui-g">
+  <div class="ui-g-2 ui-sm-6">
+    <div class="entry-item">
+      <div class="entry-title">Prep Time</div>
+      <div><input required class="entry-field" type="text" pInputText [(ngModel)]="prepTime" /></div>
+      <span class="error-text" *ngIf="prepTimeError && prepTimeError.length > 0">{{ prepTimeError }}</span>
+    </div>
+  </div>
+  <div class="ui-g-2 ui-sm-6">
+    <div class="entry-item">
+      <div class="entry-title">Cook Time</div>
+      <div><input required class="entry-field" type="text" pInputText [(ngModel)]="cookTime" /></div>
+      <span class="error-text" *ngIf="cookTimeError && cookTimeError.length > 0">{{ cookTimeError }}</span>
+    </div>
+  </div>
+  <div class="ui-g-2 ui-sm-6">
+    <div class="entry-item">
+      <div class="entry-title">Servings</div>
+      <div><input required class="entry-field" type="text" pInputText [(ngModel)]="servings" /></div>
+      <span class="error-text" *ngIf="servingsError && servingsError.length > 0">{{ servingsError }}</span>
+    </div>
+  </div>
+  <div class="ui-g-2 ui-sm-6">
+    <div class="entry-item">
+      <div class="entry-title">Ready In <span class="optional-text">(optional)</span></div>
+      <div><input class="entry-field" type="text" pInputText [(ngModel)]="readyIn" /></div>
+      <span class="error-text" *ngIf="readyInError && readyInError.length > 0">{{ readyInError }}</span>
+    </div>
+  </div>
+  <div class="ui-g-2 ui-sm-6">
+    <div class="entry-item">
+      <div class="entry-title">Yields <span class="optional-text">(optional)</span></div>
+      <div><input class="entry-field" type="text" pInputText [(ngModel)]="yield" /></div>
+      <span class="error-text" *ngIf="yieldError && yieldError.length > 0">{{ yieldError }}</span>
+    </div>
+  </div>
 </div>
-<div>
-  Ready in (optional) <input type="text" pInputText [(ngModel)]="readyIn" />
+
+<div class="ui-g">
+  <div class="ui-g-12">
+    <div class="entry-item">
+      <div class="entry-title">Ingredients</div>
+      <div><textarea required placeholder="Put each ingredient on its own line." class="entry-text" pInputTextarea type="text" pInputText [(ngModel)]="ingredients"></textarea></div>
+      <span class="error-text" *ngIf="ingredientsError && ingredientsError.length > 0">{{ ingredientsError }}</span>
+    </div>
+  </div>
 </div>
-<div>
-  Number of servings <input type="text" pInputText [(ngModel)]="servings" />
-</div>
-<div>
-  Recipe yield (optional) <input type="text" pInputText [(ngModel)]="yield" />
-</div>
-<div>
-  Title <input type="text" pInputText [(ngModel)]="title" />
-</div>
-<div>
-  Description <textarea pInputTextarea type="text" pInputText [(ngModel)]="description"></textarea>
-</div>
-<div>
-  ingredients <textarea pInputTextarea type="text" pInputText [(ngModel)]="ingredients"></textarea>
-</div>
-<div>
-  directions <textarea pInputTextarea type="text" pInputText [(ngModel)]="directions"></textarea>
+
+<div class="ui-g">
+  <div class="ui-g-12">
+    <div class="entry-item">
+      <div class="entry-title">Directions</div>
+      <div><textarea required placeholder="Put each step on its own line." class="entry-text" pInputTextarea type="text" pInputText [(ngModel)]="directions"></textarea></div>
+      <span class="error-text" *ngIf="directionsError && directionsError.length > 0">{{ directionsError }}</span>
+    </div>
+  </div>
 </div>
 
 <button (click)="saveClick()">Save</button>

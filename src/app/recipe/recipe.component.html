@@ -1,0 +1,41 @@
+<p-progressSpinner *ngIf="loading"></p-progressSpinner>
+<div>
+  <p-messages [(value)]="msgs"></p-messages>
+</div>
+<div *ngIf="!loading">
+  <div *ngIf="recipe">
+    <div *ngIf="recipe.cookTime">
+      Cook Time: {{ recipe.cookTime }}
+    </div>
+    <div *ngIf="recipe.prepTime">
+      Prep Time: {{ recipe.prepTime }}
+    </div>
+    <div *ngIf="recipe.readyIn">
+      Ready In: {{ recipe.readyIn }}
+    </div>
+    <div *ngIf="recipe.servings">
+      Servings: {{ recipe.servings }}
+    </div>
+    <div *ngIf="recipe.title">
+      Title: {{ recipe.title }}
+    </div>
+    <div *ngIf="recipe.description">
+      Description: {{ recipe.description }}
+    </div>
+    <div *ngIf="recipe.yield">
+      Yield: {{ recipe.yield }}
+    </div>
+    <div *ngIf="recipe.ingredients">
+      Ingredients:
+      <ul>
+        <li *ngFor="let ingredient of recipe.ingredients">{{ ingredient }}</li>
+      </ul>
+    </div>
+    <div *ngIf="recipe.directions">
+      Directions:
+      <ol>
+        <li *ngFor="let direction of recipe.directions">{{ direction }}</li>
+      </ol>
+    </div>
+  </div>
+</div>

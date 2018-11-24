@@ -9,6 +9,7 @@ import { CreateComponent } from './create/create.component';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { RegisterComponent } from './register/register.component';
+import { RecipeComponent } from 'src/app/recipe/recipe.component';
 
 const routes: Routes = [
   // { path: '', redirectTo: 'home', pathMatch: 'full' }
@@ -19,7 +20,8 @@ const routes: Routes = [
   { path: 'create', component: CreateComponent },
   { path: 'login', component: LoginComponent },
   { path: 'user', component: UserComponent },
-  { path: 'register', component: RegisterComponent }
+  { path: 'register', component: RegisterComponent },
+  { path: 'recipe/:id', component: RecipeComponent }
 ];
 
 @NgModule({
