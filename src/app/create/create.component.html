@@ -81,6 +81,26 @@
   </div>
 </div>
 
+<div class="ui-g">
+  <div class="ui-g-12">
+    <div class="entry-item">
+      <div class="entry-title">Tips <span class="optional-text">(optional)</span></div>
+      <div><textarea required placeholder="Put each step on its own line." class="entry-text" pInputTextarea type="text" pInputText [(ngModel)]="tips"></textarea></div>
+      <span class="error-text" *ngIf="tipsError && tipsError.length > 0">{{ tipsError }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-12">
+    <div class="entry-item">
+      <div class="entry-title">Source</div>
+      <div><input required class="entry-field" type="text" pInputText [(ngModel)]="source" /></div>
+      <span class="error-text" *ngIf="sourceError && sourceError.length > 0">{{ sourceError }}</span>
+    </div>
+  </div>
+</div>
+
 <button (click)="saveClick()">Save</button>
 
 <!-- <div *ngFor="let item of items | async; let i = index">

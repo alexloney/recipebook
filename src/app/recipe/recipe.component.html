@@ -28,14 +28,23 @@
     <div *ngIf="recipe.ingredients">
       Ingredients:
       <ul>
-        <li *ngFor="let ingredient of recipe.ingredients">{{ ingredient }}</li>
+        <li *ngFor="let ingredient of recipe.ingredientsArr">{{ ingredient }}</li>
       </ul>
     </div>
     <div *ngIf="recipe.directions">
       Directions:
       <ol>
-        <li *ngFor="let direction of recipe.directions">{{ direction }}</li>
+        <li *ngFor="let direction of recipe.directionsArr">{{ direction }}</li>
       </ol>
+    </div>
+    <div *ngIf="recipe.tips">
+      Tips:
+      <ol>
+        <li *ngFor="let tip of recipe.tipsArr">{{ tip }}</li>
+      </ol>
+    </div>
+    <div *ngIf="recipe.source">
+      Source: {{ recipe.source }}
     </div>
   </div>
 </div>

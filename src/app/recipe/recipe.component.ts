@@ -4,17 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
-export interface Recipe {
-  prepTime: string;
-  cookTime: string;
-  readyIn?: string;
-  servings: string;
-  yield?: string;
-  title: string;
-  description: string;
-  ingredients: string[];
-  directions: string[];
- }
+import { Recipe, RecipeJson } from '../models/recipe'
 
 @Component({
   selector: 'app-recipe',
@@ -28,9 +18,9 @@ export class RecipeComponent implements OnInit, OnDestroy {
   loading: boolean;
   msgs = [];
 
-  private recipesCollection: AngularFirestoreCollection<Recipe>;
+  private recipesCollection: AngularFirestoreCollection<RecipeJson>;
 
-  recipes: Observable<Recipe[]>;
+  recipes: Observable<RecipeJson[]>;
 
   id: string;
 
@@ -56,7 +46,8 @@ export class RecipeComponent implements OnInit, OnDestroy {
     this.afs.firestore.doc('/recipes/' + this.id).get().then(
       success => {
         if (success.exists) {
-          this.recipe = success.data() as Recipe;
+          this.recipe = new Recipe();
+          this.recipe.fromJson(success.data() as RecipeJson);
         } else {
           this.msgs.push({severity: 'error', summary: 'Does Not Exist',
             detail: 'The recipe you\'re attempting to find does not appear to exist'});

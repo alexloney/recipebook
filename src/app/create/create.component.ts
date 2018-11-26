@@ -9,17 +9,8 @@ import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export interface Recipe {
-  prepTime: string;
-  cookTime: string;
-  readyIn?: string;
-  servings: string;
-  yield?: string;
-  title: string;
-  description: string;
-  ingredients: string[];
-  directions: string[];
- }
+import { Recipe, RecipeJson } from '../models/recipe';
+
 
 @Component({
   selector: 'app-create',
@@ -27,7 +18,7 @@ export interface Recipe {
   styleUrls: ['./create.component.less']
 })
 export class CreateComponent implements OnInit {
-  private recipes: AngularFirestoreCollection<Recipe>;
+  private recipes: AngularFirestoreCollection<RecipeJson>;
 
   prepTime: string;
   cookTime: string;
@@ -38,6 +29,8 @@ export class CreateComponent implements OnInit {
   description: string;
   ingredients: string;
   directions: string;
+  source: string;
+  tips: string;
 
   msgs = [];
   prepTimeError = '';
@@ -49,8 +42,8 @@ export class CreateComponent implements OnInit {
   descriptionError = '';
   ingredientsError = '';
   directionsError = '';
-
-  formValidation;
+  sourceError = '';
+  tipsError = '';
 
   // private itemDoc: AngularFirestoreDocument<Recipe>;
   // items: Observable<any[]>;
@@ -59,7 +52,7 @@ export class CreateComponent implements OnInit {
     private router: Router) {
 
     // Create a handle to the recipes collection
-    this.recipes = afs.collection<Recipe>('recipes');
+    this.recipes = afs.collection<RecipeJson>('recipes');
 
 
     // this.items = this.afs.collection('items').snapshotChanges().pipe(map(actions => {
@@ -75,13 +68,7 @@ export class CreateComponent implements OnInit {
     // console.log(this.items);
   }
 
-  ngOnInit() {
-    this.formValidation = new FormGroup({
-      'title': new FormControl(this.title, [
-        Validators.required
-      ])
-    });
-  }
+  ngOnInit() { }
 
   validateFields() {
     let valid = true;
@@ -121,6 +108,11 @@ export class CreateComponent implements OnInit {
       valid = false;
     }
 
+    if (!this.source || this.source.length == 0) {
+      this.sourceError = 'Required';
+      valid = false;
+    }
+
     return valid;
   }
 
@@ -131,32 +123,30 @@ export class CreateComponent implements OnInit {
     // let itemDoc = this.afs.doc<Recipe>('recipes/1');
 
     // Build the recipe document to insert
-    let recpie: Recipe = {
-      prepTime: this.prepTime,
-      cookTime: this.cookTime,
-      readyIn: this.readyIn,
-      servings: this.servings,
-      yield: this.yield,
-      title: this.title,
-      description: this.description,
-      ingredients: this.ingredients.split(/[\r\n]+/),
-      directions: this.directions.split(/[\r\n]+/)
-    };
+    let recipe = new Recipe();
+    recipe.prepTime = this.prepTime;
+    recipe.cookTime = this.cookTime;
+    recipe.servings = this.servings;
+    recipe.title = this.title;
+    recipe.description = this.description;
+    recipe.ingredients = this.ingredients;
+    recipe.directions = this.directions;
+    recipe.submittedBy = 'test'; // TODO: Update with user ID
+    recipe.submittedDate = new Date();
+    recipe.source = this.source;
+    
+    if (this.readyIn && this.readyIn.length > 0)
+      recipe.readyIn = this.readyIn;
+    if (this.yield && this.yield.length > 0)
+      recipe.yield = this.yield;
+    if (this.tips && this.tips.length > 0)
+      recipe.tips = this.tips;
 
-    // Add in optional params if they exist
-    if (this.readyIn)
-    {
-      recpie.readyIn = this.readyIn;
-    }
-    if (this.yield)
-    {
-      recpie.yield = this.yield;
-    }
 
     // TODO: Enable saving state
 
     // add the document
-    this.recipes.add(recpie).then(
+    this.recipes.add(recipe.toJson()).then(
       success => {
         // TODO: Disable saving state
 
