@@ -24,6 +24,7 @@ import { ButtonModule } from 'primeng/button';
 import {MessagesModule} from 'primeng/messages';
 import {MessageModule} from 'primeng/message';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import {AutoCompleteModule} from 'primeng/autocomplete';
 
 import { NewRecipesComponent } from './new-recipes/new-recipes.component';
 import { TopRecipesComponent } from './top-recipes/top-recipes.component';
@@ -63,7 +64,8 @@ import { RecipeComponent } from './recipe/recipe.component';
     MessagesModule,
     MessageModule,
     ProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AutoCompleteModule
   ],
   providers: [
     AuthService,

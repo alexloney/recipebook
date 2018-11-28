@@ -101,6 +101,12 @@
   </div>
 </div>
 
+<div class="ui-g">
+  <div class="ui-g-12">
+    <p-autoComplete [multiple]="true" [(ngModel)]="tags" [suggestions]="tagResults" (completeMethod)="searchTags($event)" (onSelect)="selectTag($event)"></p-autoComplete>
+  </div>
+</div>
+
 <button (click)="saveClick()">Save</button>
 
 <!-- <div *ngFor="let item of items | async; let i = index">

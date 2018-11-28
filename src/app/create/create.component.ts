@@ -11,6 +11,9 @@ import { map } from 'rxjs/operators';
 
 import { Recipe, RecipeJson } from '../models/recipe';
 
+export interface TagJson {
+  name: string;
+}
 
 @Component({
   selector: 'app-create',
@@ -19,6 +22,9 @@ import { Recipe, RecipeJson } from '../models/recipe';
 })
 export class CreateComponent implements OnInit {
   private recipes: AngularFirestoreCollection<RecipeJson>;
+
+  allTags: TagJson[];
+  tagResults: string[];
 
   prepTime: string;
   cookTime: string;
@@ -31,6 +37,7 @@ export class CreateComponent implements OnInit {
   directions: string;
   source: string;
   tips: string;
+  tags: any;
 
   msgs = [];
   prepTimeError = '';
@@ -44,6 +51,7 @@ export class CreateComponent implements OnInit {
   directionsError = '';
   sourceError = '';
   tipsError = '';
+  tagsError = '';
 
   // private itemDoc: AngularFirestoreDocument<Recipe>;
   // items: Observable<any[]>;
@@ -68,7 +76,11 @@ export class CreateComponent implements OnInit {
     // console.log(this.items);
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.getAllTags().subscribe((allTags) => {
+      this.allTags = allTags as TagJson[];
+    })
+  }
 
   validateFields() {
     let valid = true;
@@ -134,7 +146,7 @@ export class CreateComponent implements OnInit {
     recipe.submittedBy = 'test'; // TODO: Update with user ID
     recipe.submittedDate = new Date();
     recipe.source = this.source;
-    
+
     if (this.readyIn && this.readyIn.length > 0)
       recipe.readyIn = this.readyIn;
     if (this.yield && this.yield.length > 0)
@@ -163,6 +175,41 @@ export class CreateComponent implements OnInit {
     );
 
     // itemDoc.update(item);
+  }
+
+  getAllTags() {
+    return this.afs.collection('tags', ref => ref.orderBy('name')).valueChanges();
+  }
+
+  searchTags(event) {
+
+    this.tagResults = ['(new) ' + event.query];
+
+    console.log(this.tags);
+
+    for (let i = 0; i < this.allTags.length; ++i) {
+      if (this.allTags[i].name.toLowerCase().indexOf(event.query.toLowerCase()) != -1) {
+        this.tagResults.push(this.allTags[i].name)
+      }
+    }
+  }
+
+  selectTag(event: string) {
+
+    // Remove the "(new)" tag if it's preasent
+    for (let i = 0; i < this.tags.length; ++i)
+    {
+      if (this.tags[i].startsWith('(new) '))
+      {
+        this.tags[i] = this.tags[i].substring(6);
+      }
+    }
+
+    // And remove any duplicate items from the array
+    let seen = {};
+    this.tags = this.tags.filter((item) => {
+      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
   }
 
 }
