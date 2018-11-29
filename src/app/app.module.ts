@@ -29,12 +29,12 @@ import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NewRecipesComponent } from './new-recipes/new-recipes.component';
 import { TopRecipesComponent } from './top-recipes/top-recipes.component';
 import { CategoriesComponent } from './categories/categories.component';
-import { CreateComponent } from './create/create.component';
+import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
-import { RecipeComponent } from './recipe/recipe.component';
+import { RecipeViewComponent } from './recipes/recipe-view/recipe-view.component';
 
 @NgModule({
   declarations: [
@@ -43,12 +43,12 @@ import { RecipeComponent } from './recipe/recipe.component';
     NewRecipesComponent,
     TopRecipesComponent,
     CategoriesComponent,
-    CreateComponent,
+    RecipeEditComponent,
     LoginComponent,
     UserComponent,
     RegisterComponent,
     HomeComponent,
-    RecipeComponent
+    RecipeViewComponent
   ],
   imports: [
     BrowserModule,

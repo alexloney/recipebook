@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Validators, FormGroup, FormControl } from '@angular/forms';
 
 import { AngularFireDatabase } from '@angular/fire/database';
@@ -9,35 +9,28 @@ import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Recipe, RecipeJson } from '../models/recipe';
+import { Recipe, RecipeJson } from '../recipe.model';
 
 export interface TagJson {
   name: string;
 }
 
 @Component({
-  selector: 'app-create',
-  templateUrl: './create.component.html',
-  styleUrls: ['./create.component.less']
+  selector: 'app-recipe-edit',
+  templateUrl: './recipe-edit.component.html',
+  styleUrls: ['./recipe-edit.component.less']
 })
-export class CreateComponent implements OnInit {
+export class RecipeEditComponent implements OnInit, OnDestroy {
   private recipes: AngularFirestoreCollection<RecipeJson>;
+  private sub: any;
 
+  loading = false;
+
+  id: number;
   allTags: TagJson[];
   tagResults: string[];
 
-  prepTime: string;
-  cookTime: string;
-  readyIn: string;
-  servings: string;
-  yield: string;
-  title: string;
-  description: string;
-  ingredients: string;
-  directions: string;
-  source: string;
-  tips: string;
-  tags: any;
+  recipe: Recipe;
 
   msgs = [];
   prepTimeError = '';
@@ -56,7 +49,8 @@ export class CreateComponent implements OnInit {
   // private itemDoc: AngularFirestoreDocument<Recipe>;
   // items: Observable<any[]>;
 
-  constructor(private afs: AngularFirestore,
+  constructor(private route: ActivatedRoute,
+    private afs: AngularFirestore,
     private router: Router) {
 
     // Create a handle to the recipes collection
@@ -79,48 +73,80 @@ export class CreateComponent implements OnInit {
   ngOnInit() {
     this.getAllTags().subscribe((allTags) => {
       this.allTags = allTags as TagJson[];
-    })
+    });
+
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+
+      this.loadRecipe();
+    });
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+  }
+
+  loadRecipe() {
+    // TODO: Show loading screen
+
+    this.recipe = new Recipe();
+    this.loading = true;
+    this.afs.firestore.doc('/recipes/' + this.id).get().then(
+      success => {
+        if (success.exists) {
+          this.recipe.fromJson(success.data() as RecipeJson);
+        }
+        this.loading = false;
+      },
+      failure => {
+        this.msgs.push({severity: 'error', summary: failure.code, detail: failure.message});
+
+        console.error(failure);
+        this.loading = false;
+      }
+    );
+
   }
 
   validateFields() {
     let valid = true;
 
-    if (!this.prepTime || this.prepTime.length == 0) {
+    if (!this.recipe.prepTime || this.recipe.prepTime.length == 0) {
       this.prepTimeError = 'Required';
       valid = false;
     }
 
-    if (!this.cookTime || this.cookTime.length == 0) {
+    if (!this.recipe.cookTime || this.recipe.cookTime.length == 0) {
       this.cookTimeError = 'Required';
       valid = false;
     }
 
-    if (!this.servings || this.servings.length == 0) {
+    if (!this.recipe.servings || this.recipe.servings.length == 0) {
       this.servingsError = 'Required';
       valid = false;
     }
 
-    if (!this.title || this.title.length == 0) {
+    if (!this.recipe.title || this.recipe.title.length == 0) {
       this.titleError = 'Required';
       valid = false;
     }
 
-    if (!this.description || this.description.length == 0) {
+    if (!this.recipe.description || this.recipe.description.length == 0) {
       this.descriptionError = 'Required';
       valid = false;
     }
 
-    if (!this.ingredients || this.ingredients.length == 0) {
+    if (!this.recipe.ingredients || this.recipe.ingredients.length == 0) {
       this.ingredientsError = 'Required';
       valid = false;
     }
 
-    if (!this.directions || this.directions.length == 0) {
+    if (!this.recipe.directions || this.recipe.directions.length == 0) {
       this.directionsError = 'Required';
       valid = false;
     }
 
-    if (!this.source || this.source.length == 0) {
+    if (!this.recipe.source || this.recipe.source.length == 0) {
       this.sourceError = 'Required';
       valid = false;
     }
@@ -134,45 +160,35 @@ export class CreateComponent implements OnInit {
     }
     // let itemDoc = this.afs.doc<Recipe>('recipes/1');
 
-    // Build the recipe document to insert
-    let recipe = new Recipe();
-    recipe.prepTime = this.prepTime;
-    recipe.cookTime = this.cookTime;
-    recipe.servings = this.servings;
-    recipe.title = this.title;
-    recipe.description = this.description;
-    recipe.ingredients = this.ingredients;
-    recipe.directions = this.directions;
-    recipe.submittedBy = 'test'; // TODO: Update with user ID
-    recipe.submittedDate = new Date();
-    recipe.source = this.source;
+    if (this.recipe.id) {
+      this.recipe.updatedBy = 'test'; // TODO: Update with user ID
+      this.recipe.updatedDate = new Date();
+    } else {
+      this.recipe.submittedBy = 'test'; // TODO: Update with user ID
+      this.recipe.submittedDate = new Date();  
+    }
 
+    this.recipe.save(this.afs).then(
+      (success: any) => {
+        this.router.navigate(['recipe', success.id]);
+      },
+      failure => {
+        this.msgs.push({severity: 'error', summary: failure.code, detail: failure.message});
+        console.error(failure);
+      }
+    )
+
+    // Build the recipe document to insert
+    /*
     if (this.readyIn && this.readyIn.length > 0)
       recipe.readyIn = this.readyIn;
     if (this.yield && this.yield.length > 0)
       recipe.yield = this.yield;
     if (this.tips && this.tips.length > 0)
       recipe.tips = this.tips;
+*/
 
 
-    // TODO: Enable saving state
-
-    // add the document
-    this.recipes.add(recipe.toJson()).then(
-      success => {
-        // TODO: Disable saving state
-
-        // TODO: Redirect to recipe success.id
-        this.router.navigate(['recipe', success.id]);
-      },
-      failure => {
-        // TODO: Disable saving state
-
-        // TODO: Display error message
-        this.msgs.push({severity: 'error', summary: failure.code, detail: failure.message});
-        console.error(failure);
-      }
-    );
 
     // itemDoc.update(item);
   }
@@ -185,7 +201,7 @@ export class CreateComponent implements OnInit {
 
     this.tagResults = ['(new) ' + event.query];
 
-    console.log(this.tags);
+    console.log(this.recipe.tags);
 
     for (let i = 0; i < this.allTags.length; ++i) {
       if (this.allTags[i].name.toLowerCase().indexOf(event.query.toLowerCase()) != -1) {
@@ -197,17 +213,17 @@ export class CreateComponent implements OnInit {
   selectTag(event: string) {
 
     // Remove the "(new)" tag if it's preasent
-    for (let i = 0; i < this.tags.length; ++i)
+    for (let i = 0; i < this.recipe.tags.length; ++i)
     {
-      if (this.tags[i].startsWith('(new) '))
+      if (this.recipe.tags[i].startsWith('(new) '))
       {
-        this.tags[i] = this.tags[i].substring(6);
+        this.recipe.tags[i] = this.recipe.tags[i].substring(6);
       }
     }
 
     // And remove any duplicate items from the array
     let seen = {};
-    this.tags = this.tags.filter((item) => {
+    this.recipe.tags = this.recipe.tags.filter((item) => {
       return seen.hasOwnProperty(item) ? false : (seen[item] = true);
     });
   }

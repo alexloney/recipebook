@@ -5,11 +5,11 @@ import { HomeComponent } from './home/home.component';
 import { NewRecipesComponent } from './new-recipes/new-recipes.component';
 import { TopRecipesComponent } from './top-recipes/top-recipes.component';
 import { CategoriesComponent } from './categories/categories.component';
-import { CreateComponent } from './create/create.component';
+import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { RegisterComponent } from './register/register.component';
-import { RecipeComponent } from 'src/app/recipe/recipe.component';
+import { RecipeViewComponent } from 'src/app/recipes/recipe-view/recipe-view.component';
 
 const routes: Routes = [
   // { path: '', redirectTo: 'home', pathMatch: 'full' }
@@ -17,11 +17,13 @@ const routes: Routes = [
   { path: 'new', component: NewRecipesComponent },
   { path: 'top', component: TopRecipesComponent },
   { path: 'categories', component: CategoriesComponent },
-  { path: 'create', component: CreateComponent },
+  { path: 'edit', redirectTo: 'create' },
+  { path: 'edit/:id', component: RecipeEditComponent },
+  { path: 'create', component: RecipeEditComponent },
   { path: 'login', component: LoginComponent },
   { path: 'user', component: UserComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'recipe/:id', component: RecipeComponent }
+  { path: 'recipe/:id', component: RecipeViewComponent }
 ];
 
 @NgModule({

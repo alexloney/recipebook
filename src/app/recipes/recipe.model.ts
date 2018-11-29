@@ -1,3 +1,5 @@
+import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 // export interface Recipe {
 //     prepTime: string;
@@ -23,12 +25,15 @@ export interface RecipeJson {
     directions: string[];
     tips?: string[];
     source: string;
+    tags: string[];
     submittedBy: string;
     submittedDate: string;
+    updatedBy?: string;
     updatedDate?: string;
 }
 
 export class Recipe {
+    private _id: string;
     private _prepTime: string;
     private _cookTime: string;
     private _readyIn: string;
@@ -40,9 +45,18 @@ export class Recipe {
     private _directions: string[];
     private _tips: string[];
     private _source: string;
+    private _tags: string[] = [];
     private _submittedBy: string;
     private _submittedDate: Date;
+    private _updatedBy: string;
     private _updatedDate: Date;
+
+    get id() {
+        return this._id;
+    }
+    set id(id: string) {
+        this._id = id;
+    }
 
     get prepTime() {
         return this._prepTime;
@@ -151,6 +165,13 @@ export class Recipe {
         this._source = source;
     }
 
+    get tags() {
+        return this._tags;
+    }
+    set tags(tags: string[]) {
+        this._tags = tags;
+    }
+
     get submittedBy() {
         return this._submittedBy;
     }
@@ -173,6 +194,13 @@ export class Recipe {
     }
     set submittedDateStr(submittedDate: string) {
         this._submittedDate = new Date(submittedDate);
+    }
+
+    get updatedBy() {
+        return this._updatedBy;
+    }
+    set updatedBy(updatedBy: string) {
+        this._updatedBy = updatedBy;
     }
 
     get updatedDate() {
@@ -204,6 +232,7 @@ export class Recipe {
         this.description = json.description;
         this.ingredientsArr = json.ingredients;
         this.directionsArr = json.directions;
+        this.tags = json.tags;
         this.source = json.source;
         this.submittedBy = json.submittedBy;
         this.submittedDateStr = json.submittedDate;
@@ -228,6 +257,7 @@ export class Recipe {
             ingredients: this._ingredients,
             directions: this._directions,
             source: this._source,
+            tags: this._tags,
             submittedBy: this._submittedBy,
             submittedDate: this.submittedDateStr
         };
@@ -240,6 +270,10 @@ export class Recipe {
             ret.yield = this._yield
         }
 
+        if (this._updatedBy) {
+            ret.updatedBy = this._updatedBy;
+        }
+
         if (this._updatedDate) {
             ret.updatedDate = this.updatedDateStr;
         }
@@ -249,5 +283,13 @@ export class Recipe {
         }
 
         return ret;
+    }
+
+    save(afs: AngularFirestore): Promise<any> {
+        if (this.id) {
+            return afs.collection('recipes').doc(this.id).update(this.toJson());
+        } else {
+            return afs.collection('recipes').add(this.toJson());
+        }
     }
 }

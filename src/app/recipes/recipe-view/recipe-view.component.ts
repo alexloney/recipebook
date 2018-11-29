@@ -4,14 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
-import { Recipe, RecipeJson } from '../models/recipe'
+import { Recipe, RecipeJson } from '../recipe.model'
 
 @Component({
-  selector: 'app-recipe',
-  templateUrl: './recipe.component.html',
-  styleUrls: ['./recipe.component.less']
+  selector: 'app-recipe-view',
+  templateUrl: './recipe-view.component.html',
+  styleUrls: ['./recipe-view.component.less']
 })
-export class RecipeComponent implements OnInit, OnDestroy {
+export class RecipeViewComponent implements OnInit, OnDestroy {
   private sub: any;
 
   recipe: Recipe;
