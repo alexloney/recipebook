@@ -194,7 +194,7 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
         if (this.allTags[i].name.toLowerCase() == event.query.toLowerCase()) {
           exact = true;
         }
-        this.tagResults.push({ id: '', name: this.allTags[i].name })
+        this.tagResults.push(this.allTags[i]);
       }
     }
 
