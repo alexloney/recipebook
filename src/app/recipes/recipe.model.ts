@@ -1,6 +1,8 @@
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
+import { TagJson } from './tag.model';
+
 // export interface Recipe {
 //     prepTime: string;
 //     cookTime: string;
@@ -45,7 +47,7 @@ export class Recipe {
     private _directions: string[];
     private _tips: string[];
     private _source: string;
-    private _tags: string[] = [];
+    private _tags: TagJson[] = [];
     private _submittedBy: string;
     private _submittedDate: Date;
     private _updatedBy: string;
@@ -168,7 +170,7 @@ export class Recipe {
     get tags() {
         return this._tags;
     }
-    set tags(tags: string[]) {
+    set tags(tags: TagJson[]) {
         this._tags = tags;
     }
 
@@ -222,7 +224,32 @@ export class Recipe {
 
 
 
-    constructor() {}
+    constructor(private afs: AngularFirestore) {
+        
+    }
+
+    loadById(id: string) {
+        this.id = id;
+
+        return new Promise ((resolve, reject) => {
+            this.afs.firestore.doc('/recipes/' + this.id).get().then(
+                success => {
+                    if (success.exists) {
+                        this.fromJson(success.data() as RecipeJson).then(
+                            success2 => {
+                                resolve(success);
+                            },
+                            reject
+                        );
+                    }
+                    else {
+                        resolve(success);
+                    }
+                },
+                reject
+            );
+        })
+    }
 
     public fromJson(json: RecipeJson) {
         this.prepTime = json.prepTime;
@@ -232,7 +259,6 @@ export class Recipe {
         this.description = json.description;
         this.ingredientsArr = json.ingredients;
         this.directionsArr = json.directions;
-        this.tags = json.tags;
         this.source = json.source;
         this.submittedBy = json.submittedBy;
         this.submittedDateStr = json.submittedDate;
@@ -245,6 +271,27 @@ export class Recipe {
             this.updatedDateStr = json.updatedDate;
         if (json.tips)
             this.tipsArr = json.tips;
+
+        return new Promise((resolve, reject) => {
+            let promises = [];
+            for (let i = 0; i < json.tags.length; ++i) {
+                promises.push(this.afs.doc(json.tags[i]).ref.get());
+            }
+
+            Promise.all(promises).then(
+                (success) => {
+                    for (let i = 0; i < success.length; ++i) {
+                        this.tags.push({
+                            id: success[i].id,
+                            name: success[i].data().name
+                        });
+                    }
+                    resolve();
+                },
+                reject
+            );
+        // this.tags = json.tags;
+        });
     }
 
     public toJson(): RecipeJson {
@@ -257,10 +304,14 @@ export class Recipe {
             ingredients: this._ingredients,
             directions: this._directions,
             source: this._source,
-            tags: this._tags,
+            tags: [],
             submittedBy: this._submittedBy,
             submittedDate: this.submittedDateStr
         };
+
+        this.tags.forEach((tag) => {
+            ret.tags.push('/tags/' + tag.id);
+        });
 
         if (this._readyIn) {
             ret.readyIn = this._readyIn;
@@ -285,11 +336,54 @@ export class Recipe {
         return ret;
     }
 
-    save(afs: AngularFirestore): Promise<any> {
-        if (this.id) {
-            return afs.collection('recipes').doc(this.id).update(this.toJson());
-        } else {
-            return afs.collection('recipes').add(this.toJson());
-        }
+    save(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let promises = [];
+
+            this.tags.forEach(tag => {
+                if (tag.id.length == 0) {
+                    promises.push(this.afs.collection('tags').add({ name: tag.name }));
+                }
+            });
+
+            if (promises.length > 0) {
+                Promise.all(promises).then(
+                    success => {
+                        let pos = 0;
+                        for (let i = 0; i < this.tags.length; ++i) {
+                            if (this.tags[i].id.length == 0) {
+                                this.tags[i].id = success[pos++].id;
+                            }
+                        }
+
+                        if (this.id) {
+                            this.afs.collection('recipes').doc(this.id).update(this.toJson()).then(
+                                success => { resolve(success); }, failure => { reject(failure) }
+                                );
+                        } else {
+                            this.afs.collection('recipes').add(this.toJson()).then(
+                                success => { resolve(success); }, failure => { reject(failure) }
+                                );
+                        }
+                    },
+                    reject
+                );
+            } else {
+                if (this.id) {
+                    this.afs.collection('recipes').doc(this.id).update(this.toJson()).then(
+                        success => { resolve(success); }, failure => { reject(failure) }
+                        );
+                } else {
+                    this.afs.collection('recipes').add(this.toJson()).then(
+                        success => { resolve(success); }, failure => { reject(failure) }
+                        );
+                }
+            }
+        });
+
+        // TODO: First save tags
+
+
+
     }
 }

@@ -46,7 +46,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     this.afs.firestore.doc('/recipes/' + this.id).get().then(
       success => {
         if (success.exists) {
-          this.recipe = new Recipe();
+          this.recipe = new Recipe(this.afs);
           this.recipe.fromJson(success.data() as RecipeJson);
         } else {
           this.msgs.push({severity: 'error', summary: 'Does Not Exist',

@@ -4,16 +4,13 @@ import { Validators, FormGroup, FormControl } from '@angular/forms';
 
 import { AngularFireDatabase } from '@angular/fire/database';
 import { defineBase } from '@angular/core/src/render3';
-import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection, DocumentChangeAction } from '@angular/fire/firestore';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Recipe, RecipeJson } from '../recipe.model';
-
-export interface TagJson {
-  name: string;
-}
+import { TagJson } from '../tag.model';
 
 @Component({
   selector: 'app-recipe-edit',
@@ -26,9 +23,9 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
 
   loading = false;
 
-  id: number;
+  id: string;
   allTags: TagJson[];
-  tagResults: string[];
+  tagResults: TagJson[];
 
   recipe: Recipe;
 
@@ -55,24 +52,13 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
 
     // Create a handle to the recipes collection
     this.recipes = afs.collection<RecipeJson>('recipes');
-
-
-    // this.items = this.afs.collection('items').snapshotChanges().pipe(map(actions => {
-    //   return actions.map(a => {
-    //     const data = a.payload.doc.data() as Recipe;
-
-    //     const id = a.payload.doc.id;
-
-    //     return {id, ...data };
-    //   })
-    // }));
-    
-    // console.log(this.items);
   }
 
   ngOnInit() {
     this.getAllTags().subscribe((allTags) => {
       this.allTags = allTags as TagJson[];
+
+      console.log(this.allTags);
     });
 
     this.sub = this.route.params.subscribe(params => {
@@ -89,13 +75,11 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
   loadRecipe() {
     // TODO: Show loading screen
 
-    this.recipe = new Recipe();
+    this.recipe = new Recipe(this.afs);
     this.loading = true;
-    this.afs.firestore.doc('/recipes/' + this.id).get().then(
+
+    this.recipe.loadById(this.id).then(
       success => {
-        if (success.exists) {
-          this.recipe.fromJson(success.data() as RecipeJson);
-        }
         this.loading = false;
       },
       failure => {
@@ -105,7 +89,6 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
         this.loading = false;
       }
     );
-
   }
 
   validateFields() {
@@ -168,45 +151,55 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
       this.recipe.submittedDate = new Date();  
     }
 
-    this.recipe.save(this.afs).then(
+    this.recipe.save().then(
       (success: any) => {
-        this.router.navigate(['recipe', success.id]);
+        if (success && success.id) {
+          this.router.navigate(['recipe', success.id]);
+        } else if (this.recipe.id) {
+          this.router.navigate(['recipe', this.recipe.id]);
+        } else {
+          this.msgs.push({severity: 'error', summary: 'Unknown ID', detail: 'Unable to determine ID to redirect to'});
+        }
       },
       failure => {
         this.msgs.push({severity: 'error', summary: failure.code, detail: failure.message});
         console.error(failure);
       }
     )
-
-    // Build the recipe document to insert
-    /*
-    if (this.readyIn && this.readyIn.length > 0)
-      recipe.readyIn = this.readyIn;
-    if (this.yield && this.yield.length > 0)
-      recipe.yield = this.yield;
-    if (this.tips && this.tips.length > 0)
-      recipe.tips = this.tips;
-*/
-
-
-
-    // itemDoc.update(item);
   }
 
   getAllTags() {
+    return this.afs.collection('tags')
+      .snapshotChanges()
+      .pipe(
+        map((actions: DocumentChangeAction<TagJson>[]) => {
+          return actions.map((a: DocumentChangeAction<TagJson>) => {
+            const data: Object = a.payload.doc.data() as TagJson;
+            const id = a.payload.doc.id;
+
+            return { id, ...data };
+          })
+        })
+      )
     return this.afs.collection('tags', ref => ref.orderBy('name')).valueChanges();
   }
 
   searchTags(event) {
+    let exact = false;
 
-    this.tagResults = ['(new) ' + event.query];
-
-    console.log(this.recipe.tags);
+    this.tagResults = [{ id: '', name: '(new) ' + event.query }];
 
     for (let i = 0; i < this.allTags.length; ++i) {
       if (this.allTags[i].name.toLowerCase().indexOf(event.query.toLowerCase()) != -1) {
-        this.tagResults.push(this.allTags[i].name)
+        if (this.allTags[i].name.toLowerCase() == event.query.toLowerCase()) {
+          exact = true;
+        }
+        this.tagResults.push({ id: '', name: this.allTags[i].name })
       }
+    }
+
+    if (exact) {
+      this.tagResults.shift();
     }
   }
 
@@ -215,17 +208,20 @@ export class RecipeEditComponent implements OnInit, OnDestroy {
     // Remove the "(new)" tag if it's preasent
     for (let i = 0; i < this.recipe.tags.length; ++i)
     {
-      if (this.recipe.tags[i].startsWith('(new) '))
+      if (this.recipe.tags[i].name.startsWith('(new) '))
       {
-        this.recipe.tags[i] = this.recipe.tags[i].substring(6);
+        this.recipe.tags[i].name = this.recipe.tags[i].name.substring(6);
       }
     }
 
     // And remove any duplicate items from the array
     let seen = {};
     this.recipe.tags = this.recipe.tags.filter((item) => {
-      return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+      return seen.hasOwnProperty(item.name) ? false : (seen[item.name] = true);
     });
+
+    console.log(this.recipe.tags);
   }
+
 
 }
